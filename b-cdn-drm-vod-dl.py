@@ -80,7 +80,11 @@ class BunnyVideoDRM:
             {"authority": f"video-{self.server_id}.mediadelivery.net"}
         )
         search = re.search(r'contextId=(.*?)&secret=(.*?)"', embed_page)
-        self.context_id, self.secret = search.group(1), search.group(2)
+        if search:
+            self.context_id, self.secret = search.group(1), search.group(2)
+        else:
+            self.context_id = None
+            self.secret = None
         if name:
             self.file_name = f"{name}.mp4"
         else:
@@ -156,32 +160,40 @@ class BunnyVideoDRM:
         return resolution
 
     def download(self, video_quality: int = 0) -> None:
-        resolution = self.prepare_dl(video_quality)
-        url = [
-            f"https://iframe.mediadelivery.net/{self.guid}/{resolution}/video.drm?contextId={self.context_id}"
-        ]
         ydl_opts = {
             "http_headers": {
-                "Referer": self.embed_url,
                 "User-Agent": self.user_agent["user-agent"],
-            },
-            "concurrent_fragment_downloads": 10,
-            # 'external_downloader': 'aria2c'
-            "nocheckcertificate": True,
-            "outtmpl": self.file_name,
-            "restrictfilenames": True,
-            "windowsfilenames": True,
-            "nopart": True,
-            "paths": {
-                "home": self.path,
-                "temp": f".{self.file_name}/",
-            },
-            "retries": float("inf"),
-            "extractor_retries": float("inf"),
-            "fragment_retries": float("inf"),
-            "skip_unavailable_fragments": False,
-            "no_warnings": True,
+            }
         }
+        if self.context_id:
+            resolution = self.prepare_dl(video_quality)
+            url = [
+                f"https://iframe.mediadelivery.net/{self.guid}/{resolution}/video.drm?contextId={self.context_id}"
+            ]
+            ydl_opts["http_headers"].update({"Referer": self.embed_url})
+        else:
+            ydl_opts["http_headers"].update({"Referer": self.referer})
+            url = [self.embed_url]
+        ydl_opts.update(
+            {
+                "concurrent_fragment_downloads": 10,
+                # 'external_downloader': 'aria2c'
+                "nocheckcertificate": True,
+                "outtmpl": self.file_name,
+                "restrictfilenames": True,
+                "windowsfilenames": True,
+                "nopart": True,
+                "paths": {
+                    "home": self.path,
+                    "temp": f".{self.file_name}/",
+                },
+                "retries": float("inf"),
+                "extractor_retries": float("inf"),
+                "fragment_retries": float("inf"),
+                "skip_unavailable_fragments": False,
+                "no_warnings": True,
+            }
+        )
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download(url)
 
