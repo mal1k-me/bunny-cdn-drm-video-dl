@@ -119,7 +119,7 @@ class BunnyVideoDRM:
             resolutions = re.findall(r"\s*(.*?)\s*/video\.drm", response.text)[::-1]
             if not resolutions:
                 sys.exit(2)
-            return resolutions[0]  # Highest resolution
+            return resolutions[0]  # Highest resolution, -1 for lowest (removed else as it would be unnecessary)
 
         def video_playlist():
             params = {"contextId": self.context_id}
@@ -170,7 +170,6 @@ class BunnyVideoDRM:
         self.session.close()
         return resolution
 
-
     def download(self):
         resolution = self.prepare_dl()
         url = [
@@ -201,16 +200,16 @@ class BunnyVideoDRM:
             ydl.download(url)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     video = BunnyVideoDRM(
         # insert the referer between the quotes below (address of your webpage)
-        referer='',
+        referer="",
         # paste your embed link
-        embed_url='',
+        embed_url="",
         # you can override file name, no extension
         name="",
         # you can override download path
-        path=r""
+        path=r"",
     )
     # video.session.close()
     video.download()
