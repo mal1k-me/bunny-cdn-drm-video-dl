@@ -1,3 +1,4 @@
+import math
 import re
 import sys
 from hashlib import md5
@@ -118,8 +119,7 @@ class BunnyVideoDRM:
             resolutions = re.findall(r"\s*(.*?)\s*/video\.drm", response.text)[::-1]
             if not resolutions:
                 sys.exit(2)
-            else:
-                return resolutions[0]  # highest resolution, -1 for lowest
+            return resolutions[0]  # Highest resolution, -1 for lowest (removed else as it would be unnecessary)
 
         def video_playlist():
             params = {"contextId": self.context_id}
@@ -129,16 +129,44 @@ class BunnyVideoDRM:
                 headers=self.headers["playlist"],
             )
 
+        # Initial ping & activation
         ping(time=0, paused="true", res="0")
         activate()
+
+        # Fetch resolution and video URL
         resolution = main_playlist()
         video_playlist()
-        for i in range(0, 29, 4):  # first 28 seconds, arbitrary (check issue#11)
-            ping(
-                time=i + round(random(), 6),
-                paused="false",
-                res=resolution.split("x")[-1],
-            )
+        video_url = f"https://iframe.mediadelivery.net/{self.guid}/{resolution}/video.drm?contextId={self.context_id}"
+
+        # Get video duration using yt-dlp
+        ydl_opts = {
+            "quiet": True,
+            "simulate": True,
+            "nocheckcertificate": True,
+            "http_headers": {
+                "Referer": self.embed_url,
+                "User-Agent": self.user_agent["user-agent"],
+            },
+        }
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(video_url, download=False)
+                duration = info.get("duration", 0)  # Fallback to 0 if unavailable
+        except Exception as e:
+            print(f"Error fetching duration: {e}, using default 30 seconds")
+            duration = 30  # Default duration if extraction fails
+
+        # Calculate ping intervals (every 4 seconds up to video duration)
+        step = 4
+        max_time = math.ceil(duration) if duration > 0 else 30  # Ensure minimum coverage
+
+        # Send adaptive pings
+        t = 0
+        while t <= max_time:
+            ping_time = t + round(random(), 6)
+            ping(time=ping_time, paused="false", res=resolution.split("x")[-1])
+            t += step
+
         self.session.close()
         return resolution
 
