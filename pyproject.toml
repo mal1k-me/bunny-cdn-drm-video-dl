@@ -1,0 +1,38 @@
+[project]
+name = "bunny-cdn-drm-video-dl"
+version = "2.0"
+description = "A Python tool to download Bunny CDN's \"DRM\" videos using yt-dlp"
+classifiers = [
+    "Development Status :: 7 - Inactive",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32.5",
+    "ua-generator>=2.0.18",
+    "yt-dlp>=2025.11.12",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.11.0",
+    "mypy>=1.19.0",
+    "types-requests>=2.32.4.20250913",
+    "types-yt-dlp>=2025.11.12.20251115",
+]
+
+[tool.mypy]
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
