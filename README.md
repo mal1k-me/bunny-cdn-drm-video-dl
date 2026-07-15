@@ -1,7 +1,7 @@
 # Bunny CDN Video Downloader
 
 > [!WARNING]
-> **ARCHIVED / DISCONTINUED**
+> **Effectively ARCHIVED on 2025-12-02**
 >
 > This repository is preserved for historical reasons only. The codebase has been modernized and refactored as a tribute to the original work, but **it is no longer functional**.
 >
@@ -32,7 +32,7 @@ This project uses `uv` for dependency management.
 
 1.  Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/bunny-cdn-drm-video-dl.git
+    git clone https://github.com/mal1k-me/bunny-cdn-drm-video-dl.git
     cd bunny-cdn-drm-video-dl
     ```
 
